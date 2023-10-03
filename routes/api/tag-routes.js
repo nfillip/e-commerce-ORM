@@ -1,7 +1,8 @@
 const router = require('express').Router();
 const { Tag, Product, ProductTag } = require('../../models');
 
-// The `/api/tags` endpoint
+
+//VIEW ALL TAGS
 //http://localhost/api/tags
 router.get('/', async (req, res) => {
   // find all tags
@@ -35,24 +36,34 @@ router.get('/:id', async (req, res) => {
 
 //CREATE A NEW TAG
 //http://localhost/api/tags/
-router.post('/', async (req, res) => {
+router.post('/', (req, res) => {
   // create a new tag
  /* req.body should look like this...
     {
       tag_name: "A new tag",
+      prodIds: [1,2,3,4]
     }
   */
+Tag.create({
+      tag_name: req.body.tag_name,
 
-  try {
-    const postTag = await Tag.create({
-      tag_name: req.body.tag_name
-    })
-    res.status(200).json(postTag);
-  }catch (err) {
-    console.log(err);
-    res.status(400).json(err)
-  }
-  
+    }).then((data)=> {
+      if (req.body.prodIds.length) {
+            const productTagIdArr = req.body.prodIds.map((prod_id) => {
+              return {
+                product_id: prod_id,
+                tag_id: data.id,
+              };
+            });
+            return ProductTag.bulkCreate(productTagIdArr);
+    }
+    res.status(200).json(data);
+  })
+  .then((productTagIds) => res.status(200).json(productTagIds))
+    .catch((err) => {
+      console.log(err);
+      res.status(400).json(err);
+    });
 });
 
 //UPDATE A TAG

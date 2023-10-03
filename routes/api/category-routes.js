@@ -38,7 +38,7 @@ router.post('/', async (req, res) => {
         category_name: req.body.category_name
       });
     res.status(200).json(category)
-    console.log("New Category created")
+    console.log(category)
   }catch (err) {
     console.log(err);
     res.status(400).json(err)
